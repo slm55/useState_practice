@@ -6,8 +6,16 @@ import RegistrationForm from "./components/state_examples/RegistrationForm";
 import Slider from "./components/state_examples/Slider";
 
 export default function App() {
+  const [step, setStep] = useState(1);
+
   return (
     <div className="App">
+      {/* <Accordion />
+      <RegistrationForm /> */}
+      <Slider />
+
+    {step == 1 && <div></div>}
+
     </div>
   );
 }
