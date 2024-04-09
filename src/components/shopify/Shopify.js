@@ -6,7 +6,6 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import "./Shopify.css";
 import axios from "axios";
-
 const Header = () => {
   return (
     <header>
@@ -29,66 +28,95 @@ const Footer = () => {
 const Products = () => {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("rating");
-  const [productsList, setProductsList] = useState(products);
+  const [productsList, setProductsList] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   function sortProducts() {
-    switch (sort) {
-      case "rating":
-        productsList.sort((a, b) => b.rating - a.rating);
-        break;
-      case "asc":
-        productsList.sort((a, b) => b.price - a.price);
-        break;
-      case "dsc":
-        productsList.sort((a, b) => a.price - b.price);
-        break;
-      default:
-        break;
+    if (productsList) {
+      switch (sort) {
+        case "rating":
+          productsList.sort((a, b) => b.rating - a.rating);
+          break;
+        case "asc":
+          productsList.sort((a, b) => b.price - a.price);
+          break;
+        case "dsc":
+          productsList.sort((a, b) => a.price - b.price);
+          break;
+        default:
+          break;
+      }
     }
   }
 
-  sortProducts();
+  useEffect(() => {
+    sortProducts();
+  }, [sort]);
 
-
+  useEffect(() => {
+    axios({
+      method: "get",
+      url: "https://dummyjson.com/products",
+      responseType: "json"
+    })
+      .then((res) => res.data) // not res.json()
+      .then((data) => {
+        setProductsList(data.products);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, []);
 
   return (
     <div className="products">
       <h1>Products</h1>
-      <div className="shopify_inputs">
-        <input
-          value={search}
-          type="search"
-          placeholder="Search product..."
-          onChange={(e) => setSearch(e.target.value)}
-        />
+      {loading && <div>Loading...</div>}
+      {error && <div>{error}</div>}
+      {productsList && (
+        <>
+          <div className="shopify_inputs">
+            <input
+              value={search}
+              type="search"
+              placeholder="Search product..."
+              onChange={(e) => setSearch(e.target.value)}
+            />
 
-        <select value={sort} onChange={(e) => setSort(e.target.value)}>
-          <option value="rating">Highly rated</option>
-          <option value="asc">From low to high</option>
-          <option value="dsc">From high to low</option>
-        </select>
-      </div>
+            <select value={sort} onChange={(e) => setSort(e.target.value)}>
+              <option value="rating">Highly rated</option>
+              <option value="asc">From low to high</option>
+              <option value="dsc">From high to low</option>
+            </select>
+          </div>
 
-      <div className="cards">
-        {!search &&
-          productsList.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+          <div className="cards">
+            {!search &&
+              productsList.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
 
-        {search &&
-          productsList
-            .filter(
-              (product) =>
-                product.title.toLowerCase().startsWith(search.toLowerCase()) ||
-                product.category
-                  .toLowerCase()
-                  .startsWith(search.toLowerCase()) ||
-                product.brand.toLowerCase().startsWith(search.toLowerCase())
-            )
-            .map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-      </div>
+            {search &&
+              productsList
+                .filter(
+                  (product) =>
+                    product.title
+                      .toLowerCase()
+                      .startsWith(search.toLowerCase()) ||
+                    product.category
+                      .toLowerCase()
+                      .startsWith(search.toLowerCase()) ||
+                    product.brand.toLowerCase().startsWith(search.toLowerCase())
+                )
+                .map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+          </div>
+        </>
+      )}
     </div>
   );
 };

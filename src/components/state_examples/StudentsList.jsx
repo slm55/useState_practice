@@ -1,18 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 // 5 == 5 true
 // "hello" == "hello" true
 // [1, 2, 3] == [1, 2, 3] false
 
 function StudentsList() {
-  const [students, setStudents] = useState([
-    { id: 1, name: "John" },
-    { id: 2, name: "Mary" },
-    { id: 3, name: "Peter" },
-    { id: 4, name: "Lisa" },
-    { id: 5, name: "Sarah" },
-    { id: 6, name: "Nancy" },
-  ]);
+  const [students, setStudents] = useState(JSON.parse(localStorage.getItem("students")) || []);
   const [student, setStudent] = useState("");
   const [search, setSearch] = useState("");
 
@@ -26,6 +19,10 @@ function StudentsList() {
       setStudent("");
     }
   }
+
+  useEffect(() => {
+    localStorage.setItem("students", JSON.stringify(students));
+  }, [students]);
 
   return (
     <div>
